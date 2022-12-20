@@ -2,6 +2,16 @@ import re
 import itertools
 
 
+class FatEdgeList():
+    """
+    Edge list that keeps track of cyclic ordering of edges.
+    """
+
+    def __init__(self, edge_list, cord_dict):
+        self.edge_list = edge_list
+        self.cord_dict = cord_dict
+
+
 class ChordVertex():
     """
     Vertex object on a ChordDiagram
@@ -76,48 +86,67 @@ class ChordDiagram():
         self.n = max(v.index for v in self.vertices)
         assert self.n * 2 == len(self.vertices)
 
-    def tait_graphs(self):
+    def fat_tait_graphs(self):
         """
-        Takes ChordDiagram out returns tuple of two tait graphs for the
+        Takes ChordDiagram and returns tuple of two tait graphs for the
         corresponding knot.
         """
         graphs = []
 
         for initial_turn in (-1, 1):
-            strand_visited = [None] * self.n * 2
-            edge_dict = {i + 1: [] for i in range(self.n)}
+
+            # Create array of which strands have been visited.
+            strand_visited = [False] * self.n * 2
+            # Create empty dictionary associating each crossing to the faces it
+            # connects. Will be filled as we traverse.
+            edge_list = {i + 1: [] for i in range(self.n)}
+            # Create empty dictionary to keep track of cyclic order.
+            cyclic_ord_dict = {}
+            # Counter to assign labels to faces.
             counter = itertools.count()
 
-            def strand_index_from_vertex(vertex: ChordVertex, alignment):
+            # Function to get the 'next' strand based on the current vertex in
+            # the Gauss diagram traversal.
+            def next_strand_idx(vertex: ChordVertex, alignment):
                 if alignment == 1:
                     return v.pos_in_gc
                 elif alignment == -1:
                     return (v.pos_in_gc - 1) % (self.n * 2)
 
-            for i, s in enumerate(strand_visited):
+            # This loops over strands and if the strand is not yet visited,
+            # finds the corresponding face.
+            for i, visited in enumerate(strand_visited):
                 turn = initial_turn * (-1) ** (i % 2)
-                if s is None:
+                if not visited:
                     face = next(counter)
                     # Set starting alignment of 1.
                     a = 1
                     v = self.vertices[i]
-                    while strand_visited[strand_index_from_vertex(v, a)]\
-                            is None:
-                        # Set strand to be visited by current face.
-                        strand_visited[strand_index_from_vertex(v, a)] = face
+                    cyclic_ord = []
+                    while not strand_visited[next_strand_idx(v, a)]:
+                        # Set strand as visited.
+                        strand_visited[next_strand_idx(v, a)] = True
+                        # Append the current edge (vertex of chord diagram) to
+                        # cyclic order.
+                        cyclic_ord.append(v.index)
                         # Tranverse strand.
                         v = v.traverse(a)
                         # Set crossing as visited by current face.
-                        edge_dict[v.index].append(face)
+                        edge_list[v.index].append(face)
                         # Jump crossing.
                         v = v.jump
                         # Update alignment.
                         a = a * turn * v.height * v.writhe
-            assert all(len(faces) == 2 for faces in edge_dict.values())
-            graphs.append(tuple(edge_dict.values()))
+                    if turn == -1:
+                        cyclic_ord.reverse()
+                    cyclic_ord_dict[face] = cyclic_ord
+            assert all(len(faces) == 2 for faces in edge_list.values())
+            graphs.append(
+                FatEdgeList(tuple(edge_list.values()), cyclic_ord_dict)
+            )
 
         return tuple(graphs)
 
 
-def tait_graph_edge_lists(gauss_code):
-    return ChordDiagram(gauss_code).tait_graphs()
+def get_fat_tait_graphs(gauss_code):
+    return ChordDiagram(gauss_code).fat_tait_graphs()
