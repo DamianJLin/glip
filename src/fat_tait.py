@@ -149,6 +149,10 @@ class ChordDiagram():
                         v = v.jump
                         # Update alignment.
                         a = a * turn * v.height * v.writhe
+
+                    # If turn direction was left then the cyclic order was
+                    # correct. Otherwise it's the reversed and we need
+                    # to correct it.
                     if turn == -1:
                         cyclic_ord.reverse()
                     cyclic_ord_dict[face] = cyclic_ord
