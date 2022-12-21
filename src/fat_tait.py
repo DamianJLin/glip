@@ -91,8 +91,20 @@ class ChordDiagram():
         Takes ChordDiagram and returns tuple of two tait graphs for the
         corresponding knot.
         """
+
+        # For each Tait graph, we create an array of all the strands that
+        # have been visited. For each strand not yet visited, we explore
+        # the face that the strand belongs to, keeping track of the
+        # connections between faces diagonally across crossings, and the
+        # cyclic order of the crossings around each face. As we visit, we
+        # mark all discovered strands as visited. When all strands are
+        # visited we are done. This is done via the chord diagram.
+
+        # There will be two fat Tait graphs. Keep list to add them to.
         graphs = []
 
+        # The turn direction dictates which checkerboard colour we are looking
+        # at, and hence which Tait graph.
         for initial_turn in (-1, 1):
 
             # Create array of which strands have been visited.
