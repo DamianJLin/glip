@@ -13,6 +13,6 @@ with source.open(mode='r') as file:
             fields = line.rstrip(' \n').split(' ')
             gauss_code = line.rstrip(' \n').split(' ')[2]
             genus = vg.virtual_genus(gauss_code)
-            fields.append(str(genus))
+            fields.append('g' + str(genus))
             line = ' '.join(fields)
             out.write(line + '\n')

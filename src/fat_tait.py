@@ -25,7 +25,7 @@ class ChordVertex():
         self.traverse_next = None
         self.traverse_last = None
 
-        self.jump = None
+        self.cross = None
         self.writhe = writhe
 
     def __repr__(self):
@@ -34,6 +34,7 @@ class ChordVertex():
         writhe_str = {1: '+', -1: '-'}[self.writhe]
         return height_str + index_str + writhe_str
 
+    # Move one edge around the chord diagram.
     def traverse(self, alignment):
         if alignment == 1:
             return self.traverse_next
@@ -75,8 +76,8 @@ class ChordDiagram():
                 connect_to[v.index - 1] = i
             else:
                 u = self.vertices[connect_to[v.index - 1]]
-                v.jump = u
-                u.jump = v
+                v.cross = u
+                u.cross = v
                 connect_to[v.index - 1] = None
         if any(i is not None for i in connect_to):
             raise ValueError(
@@ -105,7 +106,7 @@ class ChordDiagram():
 
         # The turn direction dictates which checkerboard colour we are looking
         # at, and hence which Tait graph.
-        for initial_turn in (-1, 1):
+        for initial_turn in (1, -1):
 
             # Create array of which strands have been visited.
             strand_visited = [False] * self.n * 2
@@ -138,17 +139,20 @@ class ChordDiagram():
                     while not strand_visited[next_strand_idx(v, a)]:
                         # Set strand as visited.
                         strand_visited[next_strand_idx(v, a)] = True
-                        # Append the current edge (vertex of chord diagram) to
+                        # Append the current edge (vertex of chord diagram)
                         # cyclic order.
                         cyclic_ord.append(v.index)
-                        # Tranverse strand.
+                        # Caluclate jump variable (+1/-1 for over to
+                        # under/under to over).
+                        jump = v.height
+                        # Move around the chord diagram.
                         v = v.traverse(a)
                         # Set crossing as visited by current face.
                         edge_list[v.index].append(face)
-                        # Jump crossing.
-                        v = v.jump
+                        # Cross the chord diagram.
+                        v = v.cross
                         # Update alignment.
-                        a = a * turn * v.height * v.writhe
+                        a = a * turn * jump * v.writhe
 
                     # If turn direction was left then the cyclic order was
                     # correct. Otherwise it's the reversed and we need
