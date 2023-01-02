@@ -50,7 +50,7 @@ def virtual_genus(gauss_code):
     for j, face in enumerate(faces):
         for i in face:
             # We are in Z_2 do we don't need to worry about orientation.
-            # i - 1 since face labels start from 1.
+            # i - 1 since edge labels start from 1.
             boundary_2[i - 1, j] += 1
 
     boundary_2 = convert_to_finite_field(boundary_2, 2)
