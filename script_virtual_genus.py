@@ -10,9 +10,29 @@ assert source.is_file()
 with source.open(mode='r') as file:
     with target.open(mode='w') as out:
         for line in file:
+
+            # Deal with comments.
+            if line[0] == '#':
+                out.write(line)
+                break
+
             fields = line.rstrip(' \n').split(' ')
-            gauss_code = line.rstrip(' \n').split(' ')[2]
-            genus = vg.virtual_genus(gauss_code)
+            properties = fields[1]
+            gauss_code = fields[2]
+
+            try:
+                g = vg.virtual_genus(gauss_code)
+            except ValueError:
+                g = None
+
+            if g is None:
+                properties += '-'
+                genus = 'g-'
+            else:
+                properties += 'a'
+                genus = f'g{g}'
+            fields.insert(2, genus)
+
             fields.append('g' + str(genus))
             line = ' '.join(fields)
             out.write(line + '\n')

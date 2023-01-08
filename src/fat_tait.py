@@ -93,6 +93,13 @@ class ChordDiagram():
         corresponding knot.
         """
 
+        # Knots are checkerboard colourable in Carter surface iff they are
+        # alternating. Otherwise Tait graph is not defined. We check.
+        init_height = self.vertices[0].height
+        for i, v in enumerate(self.vertices):
+            if not init_height == (-1) ** (i) * v.height:
+                raise ValueError('Gauss code is not alternating.')
+
         # For each Tait graph, we create an array of all the strands that
         # have been visited. For each strand not yet visited, we explore
         # the face that the strand belongs to, keeping track of the
