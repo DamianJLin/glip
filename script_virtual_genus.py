@@ -33,6 +33,5 @@ with source.open(mode='r') as file:
                 genus = f'g{g}'
             fields.insert(2, genus)
 
-            fields.append('g' + str(genus))
             line = ' '.join(fields)
             out.write(line + '\n')
