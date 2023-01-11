@@ -149,11 +149,11 @@ class ChordDiagram():
                         # Append the current edge (vertex of chord diagram)
                         # cyclic order.
                         cyclic_ord.append(v.index)
+                        # Move around the chord diagram.
+                        v = v.traverse(a)
                         # Caluclate jump variable (+1/-1 for over to
                         # under/under to over).
                         jump = v.height
-                        # Move around the chord diagram.
-                        v = v.traverse(a)
                         # Set crossing as visited by current face.
                         edge_list[v.index].append(face)
                         # Cross the chord diagram.
