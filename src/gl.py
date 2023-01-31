@@ -440,7 +440,7 @@ def gl_pairing(gauss_code, swap_graphs=False):
     def inv(M):
         return np.round(
             np.trace(
-                form.transpose() @ np.linalg.inv(form)
+                form.transpose() @ np.linalg.inv(M)
             ),
             decimals=5
         )
@@ -448,7 +448,7 @@ def gl_pairing(gauss_code, swap_graphs=False):
         f'Alleged invariant, tr(M^TM^-1), for testing: \n{inv(form)}'
     )
 
-    print('Invariant of Hans\' gl form for 5_2428:')
+    print('Invariant of Hans\' gl form for 5_2429:')
     print(inv(np.asarray(
         [
             [1, 1, 0, -1, 0],
