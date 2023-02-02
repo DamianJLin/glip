@@ -174,7 +174,9 @@ class ChordDiagram():
 
             # This loops over strands and if the strand is not yet visited,
             # finds the corresponding face.
+            ctr = 0
             for i, visited in enumerate(strand_visited):
+                ctr += 1
                 turn = initial_turn * (-1) ** (i % 2)
                 if not visited:
                     face = next(counter)
@@ -187,19 +189,24 @@ class ChordDiagram():
                         # Set next strand as visited.
                         strand_visited[next_strand_idx(v, a)] = True
                         # Set stub_pos_at_overstrand.
+
                         if v.height == 1:  # Overstrand
                             # TODO: See why this is bugged and does not
                             # complete for the second Tait graph (though it
                             # won't affect the algorithm unless swap_graphs is
                             # set to True).
-                            print(f'{v.index = }')
+                            # print(f'{v.index = }, {a = }')
                             stub_pos_at_overstrand[v.index - 1][a] = \
                                 (face, len(cyclic_crossings))
-                            print(f'{stub_pos_at_overstrand = }')
+                            # print(f'{stub_pos_at_overstrand = }')
                         # Append the current edge (vertex of chord diagram)
                         # cyclic order.
+                        if initial_turn == -1 and ctr == 2:
+                            print('/', v.index - 1)
+                            print(f'here: {turn * a}')
                         cyclic_crossings.append(v.index)
-                        cyclic_alignment.append(a)
+                        # TODO: Check that * -v.writhe works in all cases
+                        cyclic_alignment.append(a * turn * -v.writhe)
                         # Move around the chord diagram.
                         v = v.traverse(a)
                         # Caluclate jump variable (+1/-1 for over to
@@ -218,6 +225,10 @@ class ChordDiagram():
                     if turn == -1:
                         cyclic_crossings.reverse()
                         cyclic_alignment.reverse()
+                        cyclic_alignment = cyclic_alignment[1:] + \
+                            cyclic_alignment[:1]
+                        print([c - 1 for c in cyclic_crossings],
+                              cyclic_alignment)
                     cyclic_crossings_dict[face] = cyclic_crossings
                     cyclic_alignment_dict[face] = cyclic_alignment
 
@@ -375,13 +386,18 @@ def gl_pairing(gauss_code, swap_graphs=False):
     for ls in fat_lists:
         fat_orienations.append([None] * len(ls))
     edge_seen = [False] * n_edges
+    print(faces)
+    print(f'{alignment_dict = }')
+    print(f'{position_association = }')
     for j, face in enumerate(faces):
         for i, edge in enumerate(face):
+            print(f'{edge}')
             if not edge_seen[edge]:
                 al = alignment_dict[j][i]
-                crossing_observing = faces[j][i]
-                v, cyclic_id = position_association[crossing_observing][al]
+                v, cyclic_id = position_association[edge][al]
                 fat_orienations[v][cyclic_id] = -1
+                print(f'{al = }')
+                print(f'{fat_orienations=}')
                 edge_seen[edge] = True
 
     # Now that the "in's" have been recorded, the rest are "out's".
@@ -400,6 +416,7 @@ def gl_pairing(gauss_code, swap_graphs=False):
         for i in range(j):
             cycle_a = basis[:, i]
             cycle_b = basis[:, j]
+            print(cycle_a, cycle_b)
             # TODO: Stop hardcoding this.
             for k, fat_list in enumerate(fat_lists):
                 e1 = None
@@ -407,43 +424,50 @@ def gl_pairing(gauss_code, swap_graphs=False):
                 m_0 = None
                 for m, c in enumerate(fat_list):
                     if cycle_a[c] != 0:
+                        print(f'{m = }')
                         e1_cycle = 'a'
                         e1 = - cycle_a[c] * fat_orienations[k][m]
+                        m_0 = m
+                        break
                     elif cycle_b[c] != 0:
+                        print(f'{m = }')
                         e1_cycle = 'b'
                         e1 = - cycle_b[c] * fat_orienations[k][m]
-                    m_0 = m
+                        m_0 = m
+                        break
                 for m, c in enumerate(fat_list):
                     if m == m_0:
-                        break
+                        continue
                     if cycle_a[c] != 0:
+                        print(f'{m = }')
                         e2_cycle = 'a'
                         e2 = - cycle_a[c] * fat_orienations[k][m]
+                        break
                     elif cycle_b[c] != 0:
+                        print(f'{m = }')
                         e2_cycle = 'b'
                         e2 = - cycle_b[c] * fat_orienations[k][m]
+                        break
                 if e1_cycle == e2_cycle:
                     break
                 coefficient = e1 * e2 * {'a': 1, 'b': -1}[e1_cycle]
-                form_asymmetric[i, j] = -1 * coefficient
-                form_asymmetric[j, i] = 1 * coefficient
+                print(coefficient)
+                form_asymmetric[i, j] = 1 * coefficient
+                form_asymmetric[j, i] = -1 * coefficient
 
     print(f'form_asymmetric =\n{form_asymmetric}')
 
     # === Terminate ===
+
     form = form_symmetric + form_asymmetric
     print(
-        'The Gordon-Litherland form of knot with Gauss code {gauss_code} is:'
+        f'The Gordon-Litherland form of knot with Gauss code {gauss_code} is:'
     )
     print(form)
 
-    def inv(M):
-        return np.round(
-            np.trace(
-                form.transpose() @ np.linalg.inv(M)
-            ),
-            decimals=5
-        )
+    def inv(mat):
+        mat = sp.Matrix(mat)
+        return (mat.transpose() @ mat.inverse_CH()).trace()
     print(
         f'Alleged invariant, tr(M^TM^-1), for testing: \n{inv(form)}'
     )
