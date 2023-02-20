@@ -31,3 +31,11 @@ class CyclicList():
 
         self.elements.append(element)
         self.n = len(self.elements)
+
+    def __len__(self):
+
+        return self.n
+
+    def __iter__(self):
+
+        yield from self.elements

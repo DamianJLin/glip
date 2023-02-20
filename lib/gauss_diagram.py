@@ -45,7 +45,7 @@ class GaussDiagramArc():
         self.crossing_prev = None
 
     def __repr__(self):
-        return str(self.crossing_prev) + '--' + str(self.crossing_next)
+        return f'({self.crossing_prev}) -- ({self.crossing_next})'
 
 
 class GaussDiagram():
@@ -56,6 +56,7 @@ class GaussDiagram():
         self.vertices = CyclicList()
 
         # Construct GaussDiagram's vertices and crossings.
+        crossing_number_to_crossing = {}
         for w in gauss_words:
             layer_input = w[0]
             crossing_number_input = w[1:-1]
@@ -79,8 +80,13 @@ class GaussDiagram():
             crossing_number -= 1
             writhe = {'+': 1, '-': -1}[writhe_input]
 
+            # Create new Vertex and Crossing objects if necessary.
             v = GaussDiagramVertex(layer)
-            c = GaussDiagramCrossing(crossing_number, writhe)
+            if crossing_number in crossing_number_to_crossing:
+                c = crossing_number_to_crossing[crossing_number]
+            else:
+                c = GaussDiagramCrossing(crossing_number, writhe)
+                crossing_number_to_crossing[crossing_number] = c
 
             v.crossing = c
             if layer == 'O':
