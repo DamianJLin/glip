@@ -18,7 +18,7 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
 
     # Check gauss code is alternating.
     if any(
-        gauss_diagram.vertices[i] == gauss_diagram.vertices[i + 1] for i in
+        gauss_diagram.vertices[i].layer == gauss_diagram.vertices[i + 1].layer for i in
         range(len(gauss_diagram.vertices))
     ):
         raise ValueError(
@@ -127,6 +127,8 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
                 not_finished = vertex is not vertex_0 or alignment == -1
 
             # Reverse if necessary.
+            # TODO: Fix this. There are at least cases where if turn == 1, a token_order.cycle() is
+            # required.
             if turn == -1:
                 crossing_order.reverse()
                 token_order.reverse()
@@ -182,7 +184,7 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
     basis_ker = red_2_boundary[:, :rank_ker]
 
     if verbose:
-        print(f'red_2_boundary = \n{red_2_boundary}\n')
+        print(f'red_2_boundary = \n{sp.pretty(red_2_boundary)}\n')
         print(
             f'green_face_number_to_orientation_order = \n'
             f'{green_face_number_to_orientation_order}\n'
@@ -228,6 +230,12 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
     )
     basis_extended = sp.Matrix(basis_extended)
     rank_asymmetric = rank - rank_ker
+    print(f'{rank = }, {rank_ker = }')
+    print(f'basis extended\n{sp.pretty(basis_extended)}')
+    print(f'basis_ker\n{sp.pretty(basis_ker)}')
+    print(f'{sp.shape(basis_extended) = }')
+    print(f'{sp.shape(basis_ker) = }')
+    print(f'{rank_asymmetric = }')
     basis_extended[:, rank_asymmetric:] = basis_ker  # Set the symmetric part on the end.
 
     i = 0  # The next column of basis_green_tait_homology to try.
@@ -306,15 +314,18 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
 
             # Split into cases of degree 2, 3 and 4.
             degree = len(green_orientation_dict_reduced[vertex])
-            assert(degree in (0, 2, 3, 4))
 
             if very_verbose:
                 print(f'\ta: {edges_in_a}\t{sp.pretty(cycle_a.transpose())}')
                 print(f'\tb: {edges_in_b}\t{sp.pretty(cycle_b.transpose())}')
                 print(f'\tvertex: {vertex}')
+                print(f'\tdegree: {degree}')
                 print('\tcrossing_order / orientation_order:')
                 print('\t', crossing_order)
                 print('\t', orientation_order)
+
+            # TODO: Handle cases where degree is greater than 4.
+            assert(degree in (0, 2, 3, 4))
 
             if degree == 0:
                 local_linking_number = 0
