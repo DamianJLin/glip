@@ -388,7 +388,7 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
                 local_linking_number *= cycle_0[crossing_order[0]] * cycle_1[crossing_order[1]]
 
             else:
-                raise NotImplementedError
+                raise NotImplementedError('degrees odd or 3 is not yet implemented')
 
             if very_verbose:
                 print(f'\t{local_linking_number = }\n')
