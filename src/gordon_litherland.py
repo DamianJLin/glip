@@ -127,8 +127,8 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
                 not_finished = vertex is not vertex_0 or alignment == -1
 
             # Reverse if necessary.
-            # TODO: Fix this. There are at least cases where if turn == 1, a token_order.cycle() is
-            # required.
+            if turn == 1:
+                token_order.cycle(-1)
             if turn == -1:
                 crossing_order.reverse()
                 token_order.reverse()
@@ -230,12 +230,6 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
     )
     basis_extended = sp.Matrix(basis_extended)
     rank_asymmetric = rank - rank_ker
-    print(f'{rank = }, {rank_ker = }')
-    print(f'basis extended\n{sp.pretty(basis_extended)}')
-    print(f'basis_ker\n{sp.pretty(basis_ker)}')
-    print(f'{sp.shape(basis_extended) = }')
-    print(f'{sp.shape(basis_ker) = }')
-    print(f'{rank_asymmetric = }')
     basis_extended[:, rank_asymmetric:] = basis_ker  # Set the symmetric part on the end.
 
     i = 0  # The next column of basis_green_tait_homology to try.
@@ -324,19 +318,18 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
                 print('\t', crossing_order)
                 print('\t', orientation_order)
 
-            # TODO: Handle cases where degree is greater than 4.
-            assert(degree in (0, 2, 3, 4))
+            # TODO: Properly handle cases where degree is greater than 4 using recursion.
 
             if degree == 0:
                 local_linking_number = 0
 
-            if degree == 2:
+            elif degree == 2:
                 local_linking_number = 0
 
-            if degree == 3:
+            elif degree == 3:
                 k = 0
                 while not crossing_order[0] in set.intersection(edges_in_a, edges_in_b):
-                    assert k <= 2
+                    assert k <= 2, 'k Assertion Failed'
                     crossing_order.cycle()
                     orientation_order.cycle()
                     k += 1
@@ -359,10 +352,20 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
                 cycle_2 = cycle_a if crossing_order[2] in edges_in_a else cycle_b
                 local_linking_number *= cycle_1[crossing_order[1]] * cycle_2[crossing_order[2]]
 
-            if degree == 4:
+            elif degree == 4:
+
+                # Confirm both cycles have some intersection.
+                if not set.intersection(edges_in_a, crossing_order)\
+                        or not set.intersection(edges_in_b, crossing_order):
+                    continue
+
                 k = 0
-                while not (crossing_order[0] in edges_in_a and orientation_order[0] == 1):
-                    assert k <= 3
+                while not (
+                    crossing_order[0] in edges_in_a
+                    and
+                    orientation_order[0] * cycle_a[crossing_order[0]] == 1
+                ):
+                    assert k <= 3, 'k Assertion Failed'
                     crossing_order.cycle()
                     orientation_order.cycle()
                     k += 1
@@ -383,6 +386,9 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
                 cycle_0 = cycle_a if crossing_order[0] in edges_in_a else cycle_b
                 cycle_1 = cycle_a if crossing_order[1] in edges_in_a else cycle_b
                 local_linking_number *= cycle_0[crossing_order[0]] * cycle_1[crossing_order[1]]
+
+            else:
+                raise NotImplementedError
 
             if very_verbose:
                 print(f'\t{local_linking_number = }\n')
