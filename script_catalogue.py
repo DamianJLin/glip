@@ -32,10 +32,10 @@ if __name__ == '__main__':
                         form = gl.gordon_litherland_green(gauss_code)
                     except ValueError:
                         form = 'not alternating'
-                    except AssertionError:
-                        form = 'asserion error'
-                    except:
-                        form = 'other error'
+                    except AssertionError as err:
+                        form = str(err)
+                    except NotImplementedError as err:
+                        form = str(err)
 
                     if fields[2][1] == str(g):
                         out.write(
