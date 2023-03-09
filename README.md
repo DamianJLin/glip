@@ -28,7 +28,7 @@ This package computes the mock Seifert matrix of an alternating virtual knot, an
 ## Usage
 Compute mock Seifert matrix:
 
-`python gl.py <gauss code> <flags>`
+`python msm.py <gauss code> <flags>`
 
 The gauss code must be alternating.
 
