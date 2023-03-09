@@ -1,9 +1,10 @@
 import itertools
-from fractions import Fraction
+import functools
 import numpy as np
 import sympy as sp
 from lib.cyclic_list import CyclicList
 from lib.gauss_diagram import GaussDiagram
+import lib.linking as lk
 
 
 def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
@@ -271,132 +272,21 @@ def gordon_litherland_green(gauss_code, verbose=False, very_verbose=False):
             f'{green_face_number_to_orientation_order}\n'
         )
 
-    # Compute the antisymmetric form.
+    # Construct the linking_number function with crossing_orders and orientation_orders partialed.
+    linking_number = functools.partial(
+        lk.linking_number,
+        crossing_orders=green_face_number_to_crossing_order,
+        orientation_orders=green_face_number_to_orientation_order,
+        very_verbose=very_verbose
+    )
     for i, j in itertools.combinations(range(rank), 2):
 
-        linking_number = 0
         cycle_a = basis_extended[:, i]
         cycle_b = basis_extended[:, j]
-        edges_in_a = set()
-        edges_in_b = set()
-        for e in green_edges:
-            if cycle_a[e] != 0:
-                edges_in_a.add(e)
-            if cycle_b[e] != 0:
-                edges_in_b.add(e)
+        linking_number_ij = linking_number(cycle_a=cycle_a, cycle_b=cycle_b)
 
-        # Compute reduced version of green_face_number_to_crossing_order and
-        # green_face_number_to_orientation_order.
-        green_crossing_dict_reduced = {}
-        green_orientation_dict_reduced = {}
-        for vertex, crossing_order in green_face_number_to_crossing_order.items():
-            green_crossing_dict_reduced[vertex] = CyclicList()
-            green_orientation_dict_reduced[vertex] = CyclicList()
-            for k, e in enumerate(crossing_order):
-                if e in edges_in_a or e in edges_in_b:
-                    green_crossing_dict_reduced[vertex].append(e)
-                    green_orientation_dict_reduced[vertex].append(
-                        green_face_number_to_orientation_order[vertex][k]
-                    )
-
-        # Compute local linking number at each vertex.
-        for vertex in green_crossing_dict_reduced:
-            crossing_order = green_crossing_dict_reduced[vertex]
-            orientation_order = green_orientation_dict_reduced[vertex]
-            #  Switch to convention 1 for out, -1 for in.
-            orientation_order = CyclicList(*[-o for o in orientation_order])
-
-            # Split into cases of degree 2, 3 and 4.
-            degree = len(green_orientation_dict_reduced[vertex])
-
-            if very_verbose:
-                print(f'\ta: {edges_in_a}\t{sp.pretty(cycle_a.transpose())}')
-                print(f'\tb: {edges_in_b}\t{sp.pretty(cycle_b.transpose())}')
-                print(f'\tvertex: {vertex}')
-                print(f'\tdegree: {degree}')
-                print('\tcrossing_order / orientation_order:')
-                print('\t', crossing_order)
-                print('\t', orientation_order)
-
-            # TODO: Properly handle cases where degree is greater than 4 using recursion.
-
-            if degree == 0:
-                local_linking_number = 0
-
-            elif degree == 2:
-                local_linking_number = 0
-
-            elif degree == 3:
-                k = 0
-                while not crossing_order[0] in set.intersection(edges_in_a, edges_in_b):
-                    assert k <= 2, 'k Assertion Failed'
-                    crossing_order.cycle()
-                    orientation_order.cycle()
-                    k += 1
-
-                if very_verbose:
-                    print(f'\t{k = }')
-
-                local_linking_number = Fraction(1, 2)
-
-                if crossing_order[1] in edges_in_a:
-                    local_linking_number *= 1
-                else:
-                    local_linking_number *= -1
-
-                # Account for orientation of edges.
-                local_linking_number *= orientation_order[1] * orientation_order[2]
-                # Find orientation of the cycles with respect to edges, that is
-                # account for negative coefficients in cycle_a, cycle_b.
-                cycle_1 = cycle_a if crossing_order[1] in edges_in_a else cycle_b
-                cycle_2 = cycle_a if crossing_order[2] in edges_in_a else cycle_b
-                local_linking_number *= cycle_1[crossing_order[1]] * cycle_2[crossing_order[2]]
-
-            elif degree == 4:
-
-                # Confirm both cycles have some intersection.
-                if not set.intersection(edges_in_a, crossing_order)\
-                        or not set.intersection(edges_in_b, crossing_order):
-                    continue
-
-                k = 0
-                while not (
-                    crossing_order[0] in edges_in_a
-                    and
-                    orientation_order[0] * cycle_a[crossing_order[0]] == 1
-                ):
-                    assert k <= 3, 'k Assertion Failed'
-                    crossing_order.cycle()
-                    orientation_order.cycle()
-                    k += 1
-
-                if very_verbose:
-                    print(f'\t{k = }')
-
-                # Account for orientation of edges
-                if crossing_order[1] in edges_in_a or crossing_order[-1] in edges_in_a:
-                    local_linking_number = 0
-                elif crossing_order[1] in edges_in_b:
-                    if orientation_order[1] == 1:
-                        local_linking_number = 1
-                    elif orientation_order[1] == -1:
-                        local_linking_number = -1
-                # Find orientation of the cycles with respect to edges, that is
-                # account for negative coefficients in cycle_a, cycle_b.
-                cycle_0 = cycle_a if crossing_order[0] in edges_in_a else cycle_b
-                cycle_1 = cycle_a if crossing_order[1] in edges_in_a else cycle_b
-                local_linking_number *= cycle_0[crossing_order[0]] * cycle_1[crossing_order[1]]
-
-            else:
-                raise NotImplementedError('degrees odd or 3 is not yet implemented')
-
-            if very_verbose:
-                print(f'\t{local_linking_number = }\n')
-
-            linking_number += local_linking_number
-
-        form_antisymmetric[i, j] = linking_number
-        form_antisymmetric[j, i] = -linking_number
+        form_antisymmetric[i, j] = linking_number_ij
+        form_antisymmetric[j, i] = -linking_number_ij
 
     if verbose:
         print(f'form_antisymmetric = \n{sp.pretty(form_antisymmetric)}\n')

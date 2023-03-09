@@ -1,4 +1,5 @@
 import src.gordon_litherland as gl
+import lib.invariant as inv
 import sys
 
 gc = sys.argv[1]
@@ -13,4 +14,13 @@ if '--very-verbose' in sys.argv or '-vv' in sys.argv:
 else:
     very_verbose = False
 
-gl.gordon_litherland_green(gc, verbose, very_verbose)
+if '--invariants' in sys.argv or '-i' in sys.argv:
+    invariants = True
+else:
+    invariants = False
+
+form = gl.gordon_litherland_green(gc, verbose, very_verbose)
+
+if invariants:
+    print(f'Det: \t\t{inv.determinant(form)}')
+    print(f'Kobayashi: \t{inv.kobayashi(form)}')
