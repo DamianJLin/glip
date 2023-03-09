@@ -42,6 +42,16 @@ Compute mock Seifert matrix and invariants for many knots:
 
 `python catalogue.py <flags>`
 
+Sources from file `table.txt` and outputs to file `out.txt`. Expects `table.txt` to be of the form:
+```
+3.6 --hv g0 O1-U2-O3-U1-O2-U3-
+3.7 --hv g1 O1-U2-O3+U1-O2-U3+
+4.105 idhv g1 O1-U2-O3-U1-O4-U3-O2-U4-
+4.106 --hv g1 O1-U2-O3-U1-O4+U3-O2-U4+
+4.107 i--v g2 O1-U2-O3+U1-O4+U3+O2-U4+
+4.108 ---- g0 O1-U2+O3+U1-O4-U3+O2+U4-
+```
+
 Flags:
 - `-s` compute instead the symmetrisation of the mock Seifert matrix, correposnding to the Gordon-Litherland pairing $\mathscr{G}_F$ (yet to be implemented).
 
