@@ -19,7 +19,7 @@ if '--invariants' in sys.argv or '-i' in sys.argv:
 else:
     invariants = False
 
-form = gl.gordon_litherland_green(gc, verbose, very_verbose)
+form = gl.gordon_litherland(gc, verbose, very_verbose)
 
 if invariants:
     print(f'Det: \t\t{inv.determinant(form)}')

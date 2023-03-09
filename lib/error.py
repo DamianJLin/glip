@@ -1,0 +1,2 @@
+class GaussCodeNotAlternatingError(ValueError):
+    pass
