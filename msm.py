@@ -1,4 +1,4 @@
-import src.gordon_litherland as gl
+import src.mock_seifert_matrix as msm
 import lib.invariant as inv
 import sys
 
@@ -19,8 +19,6 @@ if '--invariants' in sys.argv or '-i' in sys.argv:
 else:
     invariants = False
 
-form = gl.gordon_litherland(gc, verbose, very_verbose)
+msms = msm.mock_seifert_matrices(gc, verbose, very_verbose)
 
-if invariants:
-    print(f'Det: \t\t{inv.determinant(form)}')
-    print(f'Kobayashi: \t{inv.kobayashi(form)}')
+print(msms)

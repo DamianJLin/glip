@@ -1,7 +1,7 @@
 import sys
 import functools
 import sympy as sp
-import src.gordon_litherland as gl
+import src.mock_seifert_matrix as msm
 import lib.invariant as inv
 import lib.error as er
 from progress.bar import IncrementalBar
@@ -70,7 +70,7 @@ if __name__ == '__main__':
                     gauss_code = fields[3]
 
                     try:
-                        f1, f2 = gl.gordon_litherland(gauss_code, symmetric=symmetric)
+                        f1, f2 = msm.mock_seifert_matrices(gauss_code, symmetric=symmetric)
                     except er.GaussCodeNotAlternatingError:
                         bar.next()
                         continue

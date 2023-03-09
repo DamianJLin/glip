@@ -9,10 +9,10 @@ import lib.error as er
 import lib.linking as lk
 
 
-def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=False):
+def mock_seifert_matrices(gauss_code, symmetric=False, verbose=False, very_verbose=False):
     """
-    Compute the matrices of the Gordon Litherland pairing.
-    If symmetric is True, compute instead the Symmetric Gordon Litherland Pairing.
+    Compute the pair of mock Seifert matrices of the alternating virtual knot given by gauss_code.
+    If symmetric is True, compute instead the symmetrisation of the mock Seifert matrix.
     """
 
     if very_verbose:
@@ -86,14 +86,21 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
     green_tait_edge_list = {
         c.crossing_number: c.adjacent_faces_green for c in gauss_diagram.crossings
     }
+    red_tait_edge_list = {
+        c.crossing_number: c.adjacent_faces_red for c in gauss_diagram.crossings
+    }
 
     if verbose:
         print(f'green_tait_edge_list = \n{green_tait_edge_list}\n')
         print(f'green_face_number_to_crossing_order = \n{green_face_number_to_crossing_order}\n')
 
+        print(f'red_tait_edge_list = \n{red_tait_edge_list}\n')
+
     # === Step 2 ===
 
-    # Traverse Gauss diagram for red Tait graph, computing crossing order and boundary of red faces.
+    # Traverse Gauss diagram for red Tait graph, computing token order of faces.
+    # This gives information which will enable us to orient
+    # edges in and out of the Tait graph vertices.
     arcs_visited = set()
     face_counter = itertools.count()
     red_face_number_to_crossing_order = {}
@@ -142,11 +149,8 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
             red_face_number_to_crossing_order[face_number] = crossing_order
             red_face_number_to_token_order[face_number] = token_order
 
-    red_tait_edge_list = {c.crossing_number: c.adjacent_faces_red for c in gauss_diagram.crossings}
-
     if verbose:
         print(f'red_face_number_to_crossing_order = \n{red_face_number_to_crossing_order}\n')
-        print(f'red_tait_edge_list = \n{red_tait_edge_list}\n')
         print(f'red_face_number_to_token_order = \n{red_face_number_to_token_order}\n')
 
     # === Step 3 ===
@@ -226,29 +230,29 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
 
     # === Step 5 ===
 
-    # Compute the symmetric Gordon-Litherland form.
+    # Compute the symmetrisation of the mock Seifert matrix.
 
-    def form_symmetric(basis):
+    def msm_symmetric(basis):
         return basis.transpose() @ basis
 
-    green_form_symmetric = form_symmetric(green_basis)
-    red_form_symmetric = form_symmetric(red_basis)
+    green_msm_symmetric = msm_symmetric(green_basis)
+    red_msm_symmetric = msm_symmetric(red_basis)
 
     if verbose:
-        print(f'green_form_symmetric = \n{sp.pretty(green_form_symmetric)}\n')
-        print(f'red_form_symmetric = \n{sp.pretty(red_form_symmetric)}\n')
+        print(f'green_msm_symmetric = \n{sp.pretty(green_msm_symmetric)}\n')
+        print(f'red_msm_symmetric = \n{sp.pretty(red_msm_symmetric)}\n')
 
     if symmetric:
-        return (green_form_symmetric, red_form_symmetric)
+        return (green_msm_symmetric, red_msm_symmetric)
 
     # === Step 6 ===
 
-    # Compute the anti-symmetric term in the Gordon-Litherland form.
+    # Compute the anti-symmetric part of the mock Seifert matrix.
 
-    def form_antisymmetric(basis, crossing_orders, orientation_orders):
+    def msm_antisymmetric(basis, crossing_orders, orientation_orders):
 
         rank = sp.shape(basis)[1]
-        form_antisymmetric = sp.zeros(rank)
+        msm_antisymmetric = sp.zeros(rank)
 
         linking_number = functools.partial(
             lk.linking_number,
@@ -268,35 +272,35 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
             cycle_b = basis[:, j]
             linking_number_ij = linking_number(cycle_a=cycle_a, cycle_b=cycle_b)
 
-            form_antisymmetric[i, j] = linking_number_ij
-            form_antisymmetric[j, i] = -linking_number_ij
+            msm_antisymmetric[i, j] = linking_number_ij
+            msm_antisymmetric[j, i] = -linking_number_ij
 
-        return form_antisymmetric
+        return msm_antisymmetric
 
-    green_form_antisymmetric = form_antisymmetric(
+    green_msm_antisymmetric = msm_antisymmetric(
         green_basis,
         green_face_number_to_crossing_order,
         green_face_number_to_orientation_order
     )
-    red_form_antisymmetric = form_antisymmetric(
+    red_msm_antisymmetric = msm_antisymmetric(
         red_basis,
         red_face_number_to_crossing_order,
         red_face_number_to_orientation_order
     )
 
     if verbose:
-        print(f'green_form_antisymmetric = \n{sp.pretty(green_form_antisymmetric)}\n')
-        print(f'red_form_antisymmetric = \n{sp.pretty(red_form_antisymmetric)}\n')
+        print(f'green_msm_antisymmetric = \n{sp.pretty(green_msm_antisymmetric)}\n')
+        print(f'red_msm_antisymmetric = \n{sp.pretty(red_msm_antisymmetric)}\n')
 
     # === Step 7 ===
 
-    # Compute the full Gordon-Litherland form.
+    # Add the symmetric and antisymmetric terms to compute the full mock Seifert matrix.
 
-    green_form = green_form_symmetric + green_form_antisymmetric
-    red_form = red_form_symmetric + red_form_antisymmetric
+    green_msm = green_msm_symmetric + green_msm_antisymmetric
+    red_msm = red_msm_symmetric + red_msm_antisymmetric
 
     if verbose:
-        print(f'red_form = \n{sp.pretty(red_form)}\n')
-        print(f'green_form = \n{sp.pretty(green_form)}\n')
+        print(f'red_msm = \n{sp.pretty(red_msm)}\n')
+        print(f'green_mwm = \n{sp.pretty(green_msm)}\n')
 
-    return (red_form, green_form)
+    return (red_msm, green_msm)
