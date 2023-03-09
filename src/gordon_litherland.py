@@ -151,7 +151,8 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
 
     # === Step 3 ===
 
-    # Compute the red 2-boundary operator and hence orient green/red edges.
+    # Give orientation green/red edges in and out of vertices,
+    # and hence compute 2-boundary operators.
     n_red_edges = len(red_tait_edge_list)
     n_red_faces = len(red_face_number_to_crossing_order)
     red_faces = dict(sorted(red_face_number_to_crossing_order.items())).values()
@@ -206,8 +207,8 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
 
     # === Step 4 ===
 
-    # Compute a basis for the homology of the green Tait graph by finding a maximally independent
-    # set of the adjacency matrix.
+    # Compute a basis for the homology of the Tait graphs that also contains a basis for the kernel
+    # of the symmetric and antisymmetric subspaces.
 
     green_basis = basis_ker_ext(
         green_face_number_to_crossing_order,
@@ -223,9 +224,9 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
         green_2_boundary
     )
 
-    # === Step 6 ===
+    # === Step 5 ===
 
-    # Compute the symmetric term of the form.
+    # Compute the symmetric Gordon-Litherland form.
 
     def form_symmetric(basis):
         return basis.transpose() @ basis
@@ -240,7 +241,9 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
     if symmetric:
         return (green_form_symmetric, red_form_symmetric)
 
-    # === Step 7 ===
+    # === Step 6 ===
+
+    # Compute the anti-symmetric term in the Gordon-Litherland form.
 
     def form_antisymmetric(basis, crossing_orders, orientation_orders):
 
@@ -285,7 +288,9 @@ def gordon_litherland(gauss_code, symmetric=False, verbose=False, very_verbose=F
         print(f'green_form_antisymmetric = \n{sp.pretty(green_form_antisymmetric)}\n')
         print(f'red_form_antisymmetric = \n{sp.pretty(red_form_antisymmetric)}\n')
 
-    # === Step 8 ===
+    # === Step 7 ===
+
+    # Compute the full Gordon-Litherland form.
 
     green_form = green_form_symmetric + green_form_antisymmetric
     red_form = red_form_symmetric + red_form_antisymmetric
