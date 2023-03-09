@@ -1,6 +1,7 @@
 import src.mock_seifert_matrix as msm
 import lib.invariant as inv
 import sys
+import sympy as sp
 
 gc = sys.argv[1]
 
@@ -21,4 +22,23 @@ else:
 
 msms = msm.mock_seifert_matrices(gc, verbose, very_verbose)
 
-print(msms)
+
+def inv_tuple(m):
+    all_invs = []
+    all_invs.append(inv.dimension(m))
+    all_invs.append(inv.determinant(m))
+    all_invs.append(inv.kobayashi(m))
+    all_invs.append(inv.mock_alexander(m, for_sort=True))
+
+    return tuple(all_invs)
+
+
+msms = sorted(msms, key=inv_tuple)
+
+for m in msms:
+    print(f'{sp.pretty(m)}')
+    print(f'dim: {sp.pretty(inv.dimension(m))}')
+    print(f'det: {sp.pretty(inv.determinant(m))}')
+    print(f'kob: {sp.pretty(inv.kobayashi(m))}')
+    print(f'alex: {sp.latex(inv.mock_alexander(m).as_expr())}')
+    print()

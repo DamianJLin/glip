@@ -70,22 +70,31 @@ if __name__ == '__main__':
                     gauss_code = fields[3]
 
                     try:
-                        f1, f2 = msm.mock_seifert_matrices(gauss_code, symmetric=symmetric)
+                        m1, m2 = msm.mock_seifert_matrices(gauss_code, symmetric=symmetric)
                     except er.GaussCodeNotAlternatingError:
                         bar.next()
                         continue
 
-                    data_1 = MatDetKob(f1, inv.determinant(f1), inv.kobayashi(f1))
-                    data_2 = MatDetKob(f2, inv.determinant(f2), inv.kobayashi(f2))
-                    datas = sorted((data_1, data_2))
+                    data_1 = (inv.dimension(m1), inv.determinant(m1),
+                              inv.kobayashi(m1), inv.mock_alexander(m1))
+                    data_2 = (inv.dimension(m2), inv.determinant(m2),
+                              inv.kobayashi(m2), inv.mock_alexander(m2))
+
+                    # Sort.
+                    if data_1 < data_2:
+                        msms = (m1, m2)
+                    else:
+                        msms = (m2, m1)
 
                     if fields[2][1] == str(g):
                         out.write(
                             f'{name} {properties} {genus} {gauss_code}\n'
                         )
-                        for data in datas:
+                        for m in msms:
                             out.write(
-                                f'{sp.pretty(data.mat)}, {data.det}, {data.kob}\n'
+                                f'{sp.pretty(m)},\ndet: {inv.determinant(m)},'
+                                f'\nkob: {inv.kobayashi(m)},\n'
+                                f'alex: {sp.latex(inv.mock_alexander(m).as_expr())}\n'
                             )
                             out.write('\n')
                     bar.next()
