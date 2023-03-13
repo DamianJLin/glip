@@ -20,7 +20,17 @@ if '--invariants' in sys.argv or '-i' in sys.argv:
 else:
     invariants = False
 
-msms = msm.mock_seifert_matrices(gc, verbose, very_verbose)
+if '--symmetric' in sys.argv or '-s' in sys.argv:
+    symmetric = True
+else:
+    symmetric = False
+
+msms = msm.mock_seifert_matrices(
+    gauss_code=gc,
+    symmetric=symmetric,
+    verbose=verbose,
+    very_verbose=very_verbose
+)
 
 
 def inv_tuple(m):
