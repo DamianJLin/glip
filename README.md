@@ -1,4 +1,4 @@
-# Mock Seifert Matrix
+# `msmat` - Mock Seifert Matrix Calculator
 
 ## Background
 
@@ -28,7 +28,7 @@ This package computes the mock Seifert matrix of an alternating virtual knot, an
 ## Usage
 Compute mock Seifert matrix:
 
-`python msm.py <gauss code> <flags>`
+`python msmat.py <gauss code> <flags>`
 
 The gauss code must be alternating.
 
@@ -53,7 +53,7 @@ Sources from file `table.txt` and outputs to file `out.txt`. Expects `table.txt`
 ```
 
 Flags:
-- `-s` compute instead the symmetrisation of the mock Seifert matrix, correposnding to the Gordon-Litherland pairing $\mathscr{G}_F$ (yet to be implemented).
+- `-s` compute instead the symmetrisation of the mock Seifert matrix, corresponding to the Gordon-Litherland pairing $\mathscr{G}_F$.
 
 ## References
 
