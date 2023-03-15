@@ -40,9 +40,9 @@ Flags:
 
 Compute mock Seifert matrix and invariants for many knots:
 
-`python catalogue.py <flags>`
+`python tabulate.py <flags>`
 
-Sources from file `table.txt` and outputs to file `out.txt`. Expects `table.txt` to be of the form:
+Sources from file `knots.txt` and outputs to file `out.txt`. Expects `knots.txt` to be of the form:
 ```
 3.6 --hv g0 O1-U2-O3-U1-O2-U3-
 3.7 --hv g1 O1-U2-O3+U1-O2-U3+

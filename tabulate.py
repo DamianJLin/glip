@@ -42,7 +42,7 @@ if __name__ == '__main__':
     if '-s' in sys.argv or '--symmetric' in sys.argv:
         symmetric = True
 
-    source = pathlib.Path(__file__).resolve().parent / 'table.txt'
+    source = pathlib.Path(__file__).resolve().parent / 'knots.txt'
     target = pathlib.Path(__file__).resolve().parent / 'out.txt'
     assert source.is_file()
 
