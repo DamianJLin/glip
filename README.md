@@ -18,12 +18,12 @@ A' = P^\top A P.
 
 ## Features
 
-This package computes the mock Seifert matrix of an alternating virtual knot, andcan compute some invariants derived from it, namely:
+This package computes the mock Seifert matrix of an alternating virtual knot, and can compute some invariants derived from it, namely:
 
 - The determinant of the mock Seifert matrix, $\operatorname{det} S$.
 - The dimension of the mock Seifert matrix, $\operatorname{dim} S$
 - The Kobayashi invariant of the mock Seifert matrix, $\operatorname{tr}(S^\top S^{-1})$. See [2].
-- The mock Alexander polynomial of the knot (yet to be implemented).
+- The mock Alexander polynomial of the mock Seifert matrix, $\operatorname{det}(tS - S^\top)$.
 
 ## Usage
 Compute mock Seifert matrix:
