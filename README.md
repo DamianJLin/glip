@@ -23,7 +23,7 @@ This package computes the mock Seifert matrix of an alternating virtual knot, an
 - The determinant of the mock Seifert matrix, $\operatorname{det} S$.
 - The dimension of the mock Seifert matrix, $\operatorname{dim} S$
 - The Kobayashi invariant of the mock Seifert matrix, $\operatorname{tr}(S^\top S^{-1})$. See [2].
-- The mock Alexander polynomial of the mock Seifert matrix, $\operatorname{det}(tS - S^\top)$.
+- The mock Alexander polynomial of the mock Seifert matrix, $\operatorname{det}(tS - S^\top)$. See [1].
 
 ## Usage
 Compute mock Seifert matrix:
