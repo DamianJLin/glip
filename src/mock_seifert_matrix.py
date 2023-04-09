@@ -301,6 +301,6 @@ def mock_seifert_matrices(gauss_code, symmetric=False, verbose=False, very_verbo
 
     if verbose:
         print(f'red_msm = \n{sp.pretty(red_msm)}\n')
-        print(f'green_mwm = \n{sp.pretty(green_msm)}\n')
+        print(f'green_msm = \n{sp.pretty(green_msm)}\n')
 
     return (red_msm, green_msm)
