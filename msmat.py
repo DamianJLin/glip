@@ -45,9 +45,6 @@ def inv_tuple(m):
 
 msms = sorted(msms, key=inv_tuple)
 
-for m in msms:
-    print(f'{sp.pretty(m)}')
-
 if invariants:
     for m in msms:
         print(f'dim: {sp.pretty(inv.dimension(m))}')
